@@ -40,6 +40,12 @@ class SpenderCuckooModified(ProcessingModule):
             'description': 'What scheme should be used to connect to the Cuckoo Sandbox instance (http/https).'
         },
         {
+            'name': 'api_context',
+            'type': 'str',
+            'default': '',
+            'description': 'If the Cuckoo Sandbox instance is hosted behind a custom context/URI like "/api" then you can customize this here.'
+        },
+        {
             'name': 'api_port',
             'type': 'integer',
             'default': 8090,
@@ -92,7 +98,7 @@ class SpenderCuckooModified(ProcessingModule):
 
     def each_with_type(self, target, file_type):
         # Set root URLs
-        self.base_url = '{0}://{1}:{2}'.format(self.scheme, self.host, self.api_port)
+        self.base_url = '{0}://{1}:{2}{3}'.format(self.scheme, self.host, self.api_port, self.api_context)
         self.web_base_url = '{0}://{1}:{2}'.format(self.scheme, self.host, self.web_port)
 
         self.results = dict()
