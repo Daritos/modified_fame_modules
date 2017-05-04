@@ -77,6 +77,12 @@ class SpenderCuckooModified(ProcessingModule):
             'option': True
         },
         {
+            'name': 'cert_verify',
+            'type': 'bool',
+            'default': True,
+            'description': 'This configures if we should verify the certificate of the cuckoo instance.'
+        },
+        {
             'name': 'allow_internet_access',
             'type': 'bool',
             'default': True,
@@ -148,13 +154,13 @@ class SpenderCuckooModified(ProcessingModule):
         url = self.base_url + '/tasks/create/file'
         fp = open(filepath, 'rb')
 
-        response = requests.post(url, files={'file': fp}, data=options)
+        response = requests.post(url, files={'file': fp}, data=options, verify=self.cert_verify)
         self.task_id = response.json()['task_ids'][0]
 
     def submit_url(self, target_url, options):
         url = self.base_url + '/tasks/create/url'
         options['url'] = target_url
-        response = requests.post(url, data=options)
+        response = requests.post(url, data=options, verify=self.cert_verify)
         self.task_id = response.json()['task_id']
 
     def wait_for_analysis(self):
@@ -162,7 +168,7 @@ class SpenderCuckooModified(ProcessingModule):
 
         waited_time = 0
         while waited_time < self.wait_timeout:
-            response = requests.get(url)
+            response = requests.get(url, verify=self.cert_verify)
             status = response.json()['task']['status']
 
             if status == 'reported':
@@ -224,13 +230,13 @@ class SpenderCuckooModified(ProcessingModule):
 
     def get_pcap(self):
         url = self.base_url + '/pcap/get/{0}'.format(self.task_id)
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, verify=self.cert_verify)
 
         self.register_response_as('pcap', response)
 
     def get_memory_dump(self):
         url = self.web_base_url + '/full_memory/{0}/'.format(self.task_id)
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, verify=self.cert_verify)
 
         self.register_response_as('memory_dump', response, zipped=True)
 
